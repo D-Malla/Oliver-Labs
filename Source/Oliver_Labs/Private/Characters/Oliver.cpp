@@ -27,11 +27,6 @@ AOliver::AOliver()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
-
-/* Movement Variables */
-	Speed = 0.f;
-	bIsInAir = false;
-	bIsCrouching = false;
 }
 
 // Called when the game starts or when spawned
@@ -53,8 +48,6 @@ void AOliver::BeginPlay()
 void AOliver::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	Speed = GetOwner()->GetVelocity().Size();
 }
 
 /* Input */

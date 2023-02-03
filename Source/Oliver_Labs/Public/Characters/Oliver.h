@@ -53,14 +53,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* CrouchAction;
 
-	// Movement Variables
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	float Speed;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	bool bIsInAir;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	bool bIsCrouching;
-
 	// Input Callbacks
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
