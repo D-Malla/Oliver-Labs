@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
 #include "Oliver.generated.h"
 
 class UCameraComponent;
+class UInputAction;
+class UInputMappingContext;
 class USpringArmComponent;
 
 UCLASS()
@@ -27,9 +30,42 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+/* Core Components */
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	USpringArmComponent* SpringArmComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	UCameraComponent* CameraComponent;
+
+/* Input */
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputMappingContext* OliverMappingContext;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* MovementAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* LookAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* JumpAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* CrouchAction;
+
+	// Input Variables
+	bool bIsCrouched;
+
+	// Input Callbacks
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+	virtual void Jump() override;
+	void StartCrouch();
+	void EndCrouch();
+
+public:
+/* GETTERS */
+	FORCEINLINE bool GetIsCrouched() { return bIsCrouched; }
+
+/* SETTERS */
 };
