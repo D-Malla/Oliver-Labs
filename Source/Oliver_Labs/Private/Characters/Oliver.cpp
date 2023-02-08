@@ -3,9 +3,11 @@
 
 #include "Characters/Oliver.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
@@ -27,6 +29,9 @@ AOliver::AOliver()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
+
+	/* Input */
+	bIsCrouched = false;
 }
 
 // Called when the game starts or when spawned
@@ -62,9 +67,10 @@ void AOliver::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &AOliver::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AOliver::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AOliver::Jump);
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AOliver::OliverCrouch);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AOliver::StartCrouch);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AOliver::EndCrouch);
 	}
-}
+} 
 
 void AOliver::Move(const FInputActionValue& Value)
 {
@@ -89,10 +95,30 @@ void AOliver::Look(const FInputActionValue& Value)
 
 void AOliver::Jump()
 {
+	if (bIsCrouched) return;
+	
 	Super::Jump();
 }
 
-void AOliver::OliverCrouch()
+void AOliver::StartCrouch()
 {
-	
+	if (!bIsCrouched)
+	{
+		Crouch();
+		SpringArmComponent->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
+		GetCharacterMovement()->MaxWalkSpeed = 150.f;
+		
+		bIsCrouched = true;
+	}
+}
+
+void AOliver::EndCrouch()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+		SpringArmComponent->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		bIsCrouched = false;
+	}
 }

@@ -53,9 +53,19 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* CrouchAction;
 
+	// Input Variables
+	bool bIsCrouched;
+
 	// Input Callbacks
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	virtual void Jump() override;
-	void OliverCrouch();
+	void StartCrouch();
+	void EndCrouch();
+
+public:
+/* GETTERS */
+	FORCEINLINE bool GetIsCrouched() { return bIsCrouched; }
+
+/* SETTERS */
 };
