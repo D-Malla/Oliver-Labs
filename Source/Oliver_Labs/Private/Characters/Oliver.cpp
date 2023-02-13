@@ -53,6 +53,9 @@ void AOliver::BeginPlay()
 void AOliver::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	DrawDebugLine
+	(GetWorld(), GetActorLocation(), FVector(0.f, 1000.f, 0.f), FColor::Green);
 }
 
 /* Input */
@@ -67,8 +70,8 @@ void AOliver::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &AOliver::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AOliver::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AOliver::Jump);
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AOliver::StartCrouch);
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AOliver::EndCrouch);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AOliver::ToggleCrouch);
+		//EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AOliver::EndCrouch);
 	}
 } 
 
@@ -100,25 +103,25 @@ void AOliver::Jump()
 	Super::Jump();
 }
 
-void AOliver::StartCrouch()
+void AOliver::ToggleCrouch()
 {
 	if (!bIsCrouched)
 	{
 		Crouch();
 		SpringArmComponent->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
 		GetCharacterMovement()->MaxWalkSpeed = 150.f;
-		
 		bIsCrouched = true;
 	}
-}
-
-void AOliver::EndCrouch()
-{
-	if (bIsCrouched)
+	else if (bIsCrouched)
 	{
 		UnCrouch();
 		SpringArmComponent->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 		bIsCrouched = false;
 	}
+}
+
+void AOliver::ButtonPress()
+{
+	
 }
