@@ -3,6 +3,8 @@
 
 #include "Characters/Oliver.h"
 #include "Camera/CameraComponent.h"
+#include "Environment/Buttons/ButtonBase.h"
+#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
@@ -32,6 +34,9 @@ AOliver::AOliver()
 
 	/* Input */
 	bIsCrouched = false;
+	bCanPressButton = false;
+
+	Button = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -47,15 +52,17 @@ void AOliver::BeginPlay()
 			Subsystem->AddMappingContext(OliverMappingContext, 0);
 		}
 	}
+
+	UCapsuleComponent* OliverCollision = this->GetCapsuleComponent();
+
+	OliverCollision->OnComponentBeginOverlap.AddDynamic(this, &AOliver::OnButtonVolumeBeginOverlap);
+	OliverCollision->OnComponentEndOverlap.AddDynamic(this, &AOliver::OnButtonVolumeEndOverlap);
 }
 
 // Called every frame
 void AOliver::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	DrawDebugLine
-	(GetWorld(), GetActorLocation(), FVector(0.f, 1000.f, 0.f), FColor::Green);
 }
 
 /* Input */
@@ -71,7 +78,7 @@ void AOliver::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AOliver::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AOliver::Jump);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AOliver::ToggleCrouch);
-		//EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AOliver::EndCrouch);
+		EnhancedInputComponent->BindAction(ButtonPressAction, ETriggerEvent::Started, this, &AOliver::ButtonPress);
 	}
 } 
 
@@ -121,7 +128,40 @@ void AOliver::ToggleCrouch()
 	}
 }
 
+void AOliver::OnButtonVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	Button = Cast<AButtonBase>(OtherActor);
+	UBoxComponent* ButtonVolume = Cast<UBoxComponent>(OtherComp);
+
+	if (OtherActor == Button && ButtonVolume)
+	{
+		bCanPressButton = true;
+	}
+}
+
+void AOliver::OnButtonVolumeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	UBoxComponent* ButtonVolume = Cast<UBoxComponent>(OtherComp);
+
+	if (OtherActor == Button && ButtonVolume)
+	{
+		bCanPressButton = false;
+		Button->SetIsButtonPressed(false);
+		Button = nullptr;
+	}
+}
+
 void AOliver::ButtonPress()
 {
-	
+	if (bCanPressButton && ButtonPressAnimMontage && Button != nullptr)
+	{
+		if (ButtonPressAnimMontage)
+		{
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			AnimInstance->Montage_Play(ButtonPressAnimMontage);
+			bCanPressButton = false;
+			Button->SetIsButtonPressed(true);
+			Button->ButtonPressed();
+		}
+	}
 }

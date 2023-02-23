@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "Oliver.generated.h"
 
+class AButtonBase;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -25,11 +26,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	AButtonBase* Button;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
+/* Animation References */
+	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UAnimMontage* ButtonPressAnimMontage;
+
 /* Core Components */
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	USpringArmComponent* SpringArmComponent;
@@ -58,6 +65,7 @@ private:
 
 	// Input Variables
 	bool bIsCrouched;
+	bool bCanPressButton;
 
 	// Input Callbacks
 	void Move(const FInputActionValue& Value);
@@ -65,6 +73,13 @@ private:
 	virtual void Jump() override;
 	void ToggleCrouch();
 	void ButtonPress();
+
+	// Overlap Delegates
+	// Delegates ** MUST ** have UFUNCTION
+	UFUNCTION()
+	void OnButtonVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnButtonVolumeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 public:
 /* GETTERS */
