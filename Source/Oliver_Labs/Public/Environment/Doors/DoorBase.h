@@ -27,32 +27,42 @@ protected:
 	virtual void BeginPlay() override;
 
 	/* Core Properties */
-	UPROPERTY(EditInstanceOnly, Category = "Properties")
-	bool bUsingButton;
+	//UPROPERTY(EditInstanceOnly, Category = "Properties")
+	//float DoorTimer;
 
 	UPROPERTY(EditInstanceOnly, Category = "Properties")
-	bool bUsingVolume;
+	bool bUsingButton;
 
 private:	
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	USkeletalMeshComponent* DoorComponent;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+	UBoxComponent* DoorVolume;
+
+	UPROPERTY(EditInstanceOnly, Category = "Animations")
 	UAnimSequence* DoorOpenAnim;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UPROPERTY(EditInstanceOnly, Category = "Animations")
 	UAnimSequence* DoorCloseAnim;
 
 	UPROPERTY(EditInstanceOnly, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 	uint8 DoorID;
 
-	UPROPERTY()
-	ADoorBase* DoorREF;
+	UPROPERTY(VisibleInstanceOnly, Category = "Properties")
+	bool bIsDoorUnlocked;
+
+	UFUNCTION()
+	void OnDoorVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnDoorVolumeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 public:
 	// GETTERS
 	FORCEINLINE uint8 GetDoorID() { return DoorID; }
+	FORCEINLINE bool GetIsDoorUnlocked() { return bIsDoorUnlocked; }
 
 	// SETTERS
-	FORCEINLINE void SetDoorREF(ADoorBase* Door) { DoorREF = Door; }
+	FORCEINLINE void SetIsDoorUnlocked(bool bDoorUnlocked) { bIsDoorUnlocked = bDoorUnlocked; }
+
 };

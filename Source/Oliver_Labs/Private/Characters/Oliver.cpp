@@ -2,6 +2,7 @@
 
 
 #include "Characters/Oliver.h"
+
 #include "Camera/CameraComponent.h"
 #include "Environment/Buttons/ButtonBase.h"
 #include "Components/BoxComponent.h"
@@ -128,10 +129,12 @@ void AOliver::ToggleCrouch()
 	}
 }
 
+// Door Unlock/Open functionality
 void AOliver::OnButtonVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	// Other Actor is the button to press.
 	Button = Cast<AButtonBase>(OtherActor);
-	UBoxComponent* ButtonVolume = Cast<UBoxComponent>(OtherComp);
+	UBoxComponent* ButtonVolume = Cast<UBoxComponent>(OtherComp); // OtherComp is the button's volume and we're casting it to UBoxComponent.
 
 	if (OtherActor == Button && ButtonVolume)
 	{

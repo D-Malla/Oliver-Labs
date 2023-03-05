@@ -31,21 +31,11 @@ protected:
 	USkeletalMeshComponent* ButtonComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
-	UBoxComponent* ButtonCollision;
-
-	/* Button Functionality */
-	// Delegates ** MUST ** have UFUNCTION
-	UFUNCTION()
-	void OnButtonVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	void OnButtonVolumeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UBoxComponent* ButtonVolume;
 
 	UPROPERTY(EditInstanceOnly, Category = "Door Link")
 	ADoorBase* DoorREF;
 private:
-// Door References
-	//UPROPERTY(EditDefaultsOnly, Category = "Door Link")
-	//TSubclassOf<ADoorBase> DoorBP;
 
 	UPROPERTY(EditInstanceOnly, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 	uint8 ButtonID;
