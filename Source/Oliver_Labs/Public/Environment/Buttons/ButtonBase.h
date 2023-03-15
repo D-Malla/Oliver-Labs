@@ -21,6 +21,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditInstanceOnly, Category = "Door Link")
+	ADoorBase* DoorREF;
+	
 	void ButtonPressed();
 
 protected:
@@ -32,15 +35,19 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	UBoxComponent* ButtonVolume;
-
-	UPROPERTY(EditInstanceOnly, Category = "Door Link")
-	ADoorBase* DoorREF;
 private:
 
 	UPROPERTY(EditInstanceOnly, Category = "Properties", meta = (AllowPrivateAccess = "true"))
 	uint8 ButtonID;
 
+	UPROPERTY()
 	bool bIsButtonPressed;
+
+	UPROPERTY(EditInstanceOnly, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	bool bIsSpawningObject;
+
+	UPROPERTY(EditInstanceOnly, Category = "Properties", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> ObjectToSpawn;
 
 public:
 // GETTERS

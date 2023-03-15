@@ -2,6 +2,7 @@
 
 #include "Environment/Buttons/ButtonBase.h"
 
+#include "Blueprint/UserWidget.h"
 #include "Components/BoxComponent.h"
 #include "Characters/Oliver.h"
 #include "Environment/Doors/DoorBase.h"
@@ -18,6 +19,9 @@ AButtonBase::AButtonBase()
 
 	ButtonVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("ButtonVolume"));
 	ButtonVolume->SetupAttachment(ButtonComponent);
+
+	bIsButtonPressed = false;
+	bIsSpawningObject = false;
 }
 
 // Called when the game starts or when spawned
@@ -30,7 +34,6 @@ void AButtonBase::BeginPlay()
 void AButtonBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AButtonBase::ButtonPressed()
@@ -38,7 +41,11 @@ void AButtonBase::ButtonPressed()
 	if (DoorREF && ButtonID == DoorREF->GetDoorID() && bIsButtonPressed)
 	{
 		DoorREF->SetIsDoorUnlocked(true);
-		//DoorREF->OpenDoor();
+	}
+
+	if (bIsSpawningObject && ObjectToSpawn && bIsButtonPressed)
+	{
+		GetWorld()->SpawnActor()
 	}
 }
 

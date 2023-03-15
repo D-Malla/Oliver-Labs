@@ -4,16 +4,18 @@
 #include "Characters/Oliver.h"
 
 #include "Camera/CameraComponent.h"
-#include "Environment/Buttons/ButtonBase.h"
+#include "Characters/OliverPlayerController.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/TextBlock.h"
+#include "Environment/Buttons/ButtonBase.h"
+#include "Environment/Doors/DoorBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "InputAction.h"
-#include "InputMappingContext.h"
+#include "HUD/DoorButtonWidget.h"
 
 // Sets default values
 AOliver::AOliver()
@@ -38,12 +40,19 @@ AOliver::AOliver()
 	bCanPressButton = false;
 
 	Button = nullptr;
+
+	// HUD
+	DoorHUD = nullptr;
+	DoorHUDClass = nullptr;
 }
 
 // Called when the game starts or when spawned
 void AOliver::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
+	OliverPlayerController = Cast<AOliverPlayerController>(GetWorld()->GetFirstPlayerController());
 	
 	// Adding Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -135,9 +144,21 @@ void AOliver::OnButtonVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponen
 	// Other Actor is the button to press.
 	Button = Cast<AButtonBase>(OtherActor);
 	UBoxComponent* ButtonVolume = Cast<UBoxComponent>(OtherComp); // OtherComp is the button's volume and we're casting it to UBoxComponent.
-
+	
 	if (OtherActor == Button && ButtonVolume)
 	{
+		DoorHUD = CreateWidget<UDoorButtonWidget>(OliverPlayerController, DoorHUDClass);
+		
+		if (Button->DoorREF->GetIsDoorUnlocked())
+		{
+			DoorHUD->UnlockTextBlock->SetText(FText::FromString("Door is already Unlocked!"));
+		}
+		else
+		{
+			DoorHUD->UnlockTextBlock->SetText(FText::FromString("Press E to Interact!"));
+		}
+		
+		DoorHUD->AddToPlayerScreen();
 		bCanPressButton = true;
 	}
 }
@@ -148,6 +169,7 @@ void AOliver::OnButtonVolumeEndOverlap(UPrimitiveComponent* OverlappedComponent,
 
 	if (OtherActor == Button && ButtonVolume)
 	{
+		DoorHUD->RemoveFromParent();
 		bCanPressButton = false;
 		Button->SetIsButtonPressed(false);
 		Button = nullptr;
@@ -158,13 +180,13 @@ void AOliver::ButtonPress()
 {
 	if (bCanPressButton && ButtonPressAnimMontage && Button != nullptr)
 	{
-		if (ButtonPressAnimMontage)
-		{
-			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-			AnimInstance->Montage_Play(ButtonPressAnimMontage);
-			bCanPressButton = false;
-			Button->SetIsButtonPressed(true);
-			Button->ButtonPressed();
-		}
+		if (Button->DoorREF->GetIsDoorUnlocked()) return;
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		AnimInstance->Montage_Play(ButtonPressAnimMontage);
+		bCanPressButton = false;
+		Button->SetIsButtonPressed(true);
+		Button->ButtonPressed();
+		DoorHUD->RemoveFromParent();
 	}
 }

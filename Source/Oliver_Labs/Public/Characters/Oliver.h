@@ -8,7 +8,9 @@
 #include "Oliver.generated.h"
 
 class AButtonBase;
+class AOliverPlayerController;
 class UCameraComponent;
+class UDoorButtonWidget;
 class UInputAction;
 class UInputMappingContext;
 class USpringArmComponent;
@@ -26,7 +28,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY()
 	AButtonBase* Button;
+
+	UPROPERTY()
+	AOliverPlayerController* OliverPlayerController;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UDoorButtonWidget> DoorHUDClass;
+	
+	UPROPERTY()
+	UDoorButtonWidget* DoorHUD;
 
 protected:
 	// Called when the game starts or when spawned
@@ -83,7 +95,7 @@ private:
 
 public:
 /* GETTERS */
-	FORCEINLINE bool GetIsCrouched() { return bIsCrouched; }
+	FORCEINLINE bool GetIsCrouched() const { return bIsCrouched; }
 
 /* SETTERS */
 };
