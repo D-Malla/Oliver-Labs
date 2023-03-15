@@ -7,7 +7,10 @@
 #include "InputActionValue.h"
 #include "Oliver.generated.h"
 
+class AButtonBase;
+class AOliverPlayerController;
 class UCameraComponent;
+class UDoorButtonWidget;
 class UInputAction;
 class UInputMappingContext;
 class USpringArmComponent;
@@ -25,11 +28,27 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY()
+	AButtonBase* Button;
+
+	UPROPERTY()
+	AOliverPlayerController* OliverPlayerController;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UDoorButtonWidget> DoorHUDClass;
+	
+	UPROPERTY()
+	UDoorButtonWidget* DoorHUD;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
+/* Animation References */
+	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UAnimMontage* ButtonPressAnimMontage;
+
 /* Core Components */
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	USpringArmComponent* SpringArmComponent;
@@ -53,19 +72,30 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* CrouchAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* ButtonPressAction;
+
 	// Input Variables
 	bool bIsCrouched;
+	bool bCanPressButton;
 
 	// Input Callbacks
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	virtual void Jump() override;
-	void StartCrouch();
-	void EndCrouch();
+	void ToggleCrouch();
+	void ButtonPress();
+
+	// Overlap Delegates
+	// Delegates ** MUST ** have UFUNCTION
+	UFUNCTION()
+	void OnButtonVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnButtonVolumeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 public:
 /* GETTERS */
-	FORCEINLINE bool GetIsCrouched() { return bIsCrouched; }
+	FORCEINLINE bool GetIsCrouched() const { return bIsCrouched; }
 
 /* SETTERS */
 };
