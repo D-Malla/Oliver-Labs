@@ -42,10 +42,5 @@ void AButtonBase::ButtonPressed()
 	{
 		DoorREF->SetIsDoorUnlocked(true);
 	}
-
-	if (bIsSpawningObject && ObjectToSpawn && bIsButtonPressed)
-	{
-		GetWorld()->SpawnActor()
-	}
 }
 
