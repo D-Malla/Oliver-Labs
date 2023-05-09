@@ -7,10 +7,11 @@
 #include "InputActionValue.h"
 #include "Oliver.generated.h"
 
-class AButtonBase;
 class AOliverPlayerController;
+class AButtonDoor;
+class AButtonVolume;
+class UBoxComponent;
 class UCameraComponent;
-class UDoorButtonWidget;
 class UInputAction;
 class UInputMappingContext;
 class USpringArmComponent;
@@ -28,23 +29,20 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	/* Object References */
 	UPROPERTY()
-	AButtonBase* Button;
-
+	AButtonDoor* ButtonDoor;
 	UPROPERTY()
-	AOliverPlayerController* OliverPlayerController;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UDoorButtonWidget> DoorHUDClass;
-	
-	UPROPERTY()
-	UDoorButtonWidget* DoorHUD;
+	UBoxComponent* ButtonVolume;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
+	UPROPERTY()
+		AOliverPlayerController* OliverPlayerController;
+
 /* Animation References */
 	UPROPERTY(EditDefaultsOnly, Category = "Animations")
 	UAnimMontage* ButtonPressAnimMontage;
@@ -52,26 +50,20 @@ private:
 /* Core Components */
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	USpringArmComponent* SpringArmComponent;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	UCameraComponent* CameraComponent;
 
 /* Input */
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputMappingContext* OliverMappingContext;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* MovementAction;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* LookAction;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* JumpAction;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* CrouchAction;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* ButtonPressAction;
 
@@ -84,18 +76,14 @@ private:
 	void Look(const FInputActionValue& Value);
 	virtual void Jump() override;
 	void ToggleCrouch();
-	void ButtonPress();
-
-	// Overlap Delegates
-	// Delegates ** MUST ** have UFUNCTION
-	UFUNCTION()
-	void OnButtonVolumeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	void OnButtonVolumeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void PressButton();
 
 public:
 /* GETTERS */
+	FORCEINLINE AOliverPlayerController* GetOliverPlayerController() const { return OliverPlayerController; }
 	FORCEINLINE bool GetIsCrouched() const { return bIsCrouched; }
+	FORCEINLINE bool GetCanPressButton() const { return bCanPressButton; }
 
 /* SETTERS */
+	FORCEINLINE void SetCanPressButton(bool CanPress) { bCanPressButton = CanPress; }
 };
