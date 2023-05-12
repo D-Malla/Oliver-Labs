@@ -18,10 +18,11 @@ public:
 	AOliverPlayerController();
 	virtual void BeginPlay() override;
 
+	/* HUD */
+	UPROPERTY(VisibleAnywhere, Category = "HUD")
+		UDoorButtonWidget* DoorHUD;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UDoorButtonWidget> DoorHUDClass;
-	UPROPERTY(EditAnywhere, Category = "HUD")
-		UDoorButtonWidget* DoorHUD;
 
 	UFUNCTION()
 	void DisplayButtonDoorHUD(bool IsLocked);
