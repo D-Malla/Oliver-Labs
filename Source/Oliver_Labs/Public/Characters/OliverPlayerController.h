@@ -6,9 +6,9 @@
 #include "GameFramework/PlayerController.h"
 #include "OliverPlayerController.generated.h"
 
-/**
- * 
- */
+class UDoorButtonWidget;
+class UTextBlock;
+
 UCLASS()
 class OLIVER_LABS_API AOliverPlayerController : public APlayerController
 {
@@ -17,5 +17,16 @@ class OLIVER_LABS_API AOliverPlayerController : public APlayerController
 public:
 	AOliverPlayerController();
 	virtual void BeginPlay() override;
+
+	/* HUD */
+	UPROPERTY(VisibleAnywhere, Category = "HUD")
+		UDoorButtonWidget* DoorHUD;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UDoorButtonWidget> DoorHUDClass;
+
+	UFUNCTION()
+	void DisplayButtonDoorHUD(bool IsLocked);
+	UFUNCTION()
+	void RemoveButtonDoorHUD();
 	
 };
