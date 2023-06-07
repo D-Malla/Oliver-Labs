@@ -7,6 +7,7 @@
 #include "Door.generated.h"
 
 class AOliver;
+
 class UBoxComponent;
 class USoundCue;
 
