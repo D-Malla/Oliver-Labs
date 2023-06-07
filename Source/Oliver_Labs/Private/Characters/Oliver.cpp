@@ -11,6 +11,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Environment/Doors/ButtonDoor.h"
+#include "Environment/Pushable/PushableObject.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -21,6 +22,7 @@ AOliver::AOliver()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickInterval(0.3f);
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -37,9 +39,11 @@ AOliver::AOliver()
 	/* Input */
 	bIsCrouched = false;
 	bCanPressButton = false;
+	//bIsPushing = false;
 
 	ButtonDoor = nullptr;
 	ButtonVolume = nullptr;
+	PushableObject = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -66,8 +70,11 @@ void AOliver::BeginPlay()
 void AOliver::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	PerformLineTrace();
 }
 
+//----------------------------------------------------------------------------------------------------------------------------------------------
 /* Input */
 // Called to bind functionality to input
 void AOliver::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -82,6 +89,8 @@ void AOliver::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AOliver::Jump);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AOliver::ToggleCrouch);
 		EnhancedInputComponent->BindAction(ButtonPressAction, ETriggerEvent::Started, this, &AOliver::PressButton);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AOliver::BeginPushObject);
+		//EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AOliver::EndPushObject);
 	}
 } 
 
@@ -140,5 +149,54 @@ void AOliver::PressButton()
 		ButtonDoor->SetIsDoorLocked(false);
 		bCanPressButton = false;
 		OliverPlayerController->RemoveButtonDoorHUD();
+	}
+}
+
+void AOliver::BeginPushObject()
+{
+	if (PushableObject)
+	{
+		PushableObject->CanPush();
+	}
+}
+
+void AOliver::EndPushObject()
+{
+
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------------
+
+void AOliver::PerformLineTrace()
+{
+	FVector Start = CameraComponent->GetComponentLocation();
+	FVector End = Start + CameraComponent->GetForwardVector() * 500.f;
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	
+	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 10.f);
+
+	if (Cast<APushableObject>(HitResult.GetActor()))
+	{
+		PushableObject = Cast<APushableObject>(HitResult.GetActor());
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString(TEXT("PushableObject")));
+		}
+
+		bCanPushObject = true;
+	}
+
+	if (HitResult.GetActor() == NULL)
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString(TEXT("Nothing")));
+		}
+		PushableObject = nullptr;
+		bCanPushObject = false;
 	}
 }
