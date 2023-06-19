@@ -4,6 +4,7 @@
 #include "Environment/Doors/Door.h"
 
 #include "Characters/Oliver.h"
+#include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
 #include "Sound/SoundCue.h"
 
@@ -14,10 +15,17 @@ ADoor::ADoor()
 	PrimaryActorTick.bCanEverTick = true;
 
 	DoorComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DoorComponent"));
-	DoorComponent->SetupAttachment(GetRootComponent());
+	RootComponent = DoorComponent;
 
 	DoorVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("DoorVolume"));
 	DoorVolume->SetupAttachment(DoorComponent);
+
+	OpenDoorAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("OpenDoorAudioComponent"));
+	OpenDoorAudioComponent->SetupAttachment(DoorComponent);
+	OpenDoorAudioComponent->bAutoActivate = false;
+	CloseDoorAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("CloseDoorAudioComponent"));
+	CloseDoorAudioComponent->SetupAttachment(DoorComponent);
+	CloseDoorAudioComponent->bAutoActivate = false;
 
 	Oliver = nullptr;
 }
@@ -27,7 +35,7 @@ void ADoor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//Binding Overlap callbacks for Door Volume
+	// Binding Overlap callbacks for Door Volume
 	DoorVolume->OnComponentBeginOverlap.AddDynamic(this, &ADoor::OnDoorVolumeBeginOverlap);
 	DoorVolume->OnComponentEndOverlap.AddDynamic(this, &ADoor::OnDoorVolumeEndOverlap);
 }
@@ -52,10 +60,10 @@ void ADoor::OpenDoor()
 		//GetWorldTimerManager().SetTimer(TimerHandle, this, &ADoor::CloseDoor, DoorTimer, false);
 	}
 
-	// TODO: Add SFX and play it.
-	//if (OpenSFX)
-	//{
-	//}
+	if (OpenDoorAudioComponent->Sound) // Check if a sound is set within audio component
+	{
+		OpenDoorAudioComponent->Play(0.1f);
+	}
 }
 
 void ADoor::CloseDoor()
@@ -65,8 +73,8 @@ void ADoor::CloseDoor()
 		DoorComponent->PlayAnimation(DoorCloseAnim, false);
 	}
 
-	// TODO: Add SFX and play it.
-	//if (CloseSFX)
-	//{
-	//}
+	if (CloseDoorAudioComponent->Sound)  // Check if a sound is set within audio component
+	{
+		CloseDoorAudioComponent->Play();
+	}
 }
