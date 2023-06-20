@@ -8,6 +8,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "DrawDebugHelpers.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Environment/Doors/ButtonDoor.h"
@@ -16,6 +17,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "HUD/DoorButtonWidget.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 AOliver::AOliver()
@@ -39,7 +41,6 @@ AOliver::AOliver()
 	/* Input */
 	bIsCrouched = false;
 	bCanPressButton = false;
-	//bIsPushing = false;
 
 	ButtonDoor = nullptr;
 	ButtonVolume = nullptr;
@@ -71,10 +72,8 @@ void AOliver::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	PerformLineTrace();
 }
 
-//----------------------------------------------------------------------------------------------------------------------------------------------
 /* Input */
 // Called to bind functionality to input
 void AOliver::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -89,8 +88,7 @@ void AOliver::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AOliver::Jump);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AOliver::ToggleCrouch);
 		EnhancedInputComponent->BindAction(ButtonPressAction, ETriggerEvent::Started, this, &AOliver::PressButton);
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AOliver::BeginPushObject);
-		//EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AOliver::EndPushObject);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AOliver::InteractWithObject);
 	}
 } 
 
@@ -152,51 +150,32 @@ void AOliver::PressButton()
 	}
 }
 
-void AOliver::BeginPushObject()
+void AOliver::InteractWithObject()
 {
-	if (PushableObject)
+	UWorld* WorldREF = GetWorld();
+	// Getting the foot location of character for sphere trace
+	FVector Center = GetActorLocation() - FVector(0.f, 0.f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+	float SphereRadius = 120.f;
+
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+	TArray<AActor*> OutActors;
+
+	if (GEngine)
 	{
-		PushableObject->CanPush();
-	}
-}
-
-void AOliver::EndPushObject()
-{
-
-}
-
-//----------------------------------------------------------------------------------------------------------------------------------------------
-
-void AOliver::PerformLineTrace()
-{
-	FVector Start = CameraComponent->GetComponentLocation();
-	FVector End = Start + CameraComponent->GetForwardVector() * 500.f;
-
-	FHitResult HitResult;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	
-	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 10.f);
-
-	if (Cast<APushableObject>(HitResult.GetActor()))
-	{
-		PushableObject = Cast<APushableObject>(HitResult.GetActor());
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString(TEXT("PushableObject")));
-		}
-
-		bCanPushObject = true;
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString(TEXT("Oliver is interacting!")));
 	}
 
-	if (HitResult.GetActor() == NULL)
+	DrawDebugSphere(GetWorld(), Center, SphereRadius, 12, FColor::White, false, 2.f, 0U, 1.f);
+	UKismetSystemLibrary::SphereOverlapActors(GetWorld(), Center, SphereRadius, ObjectTypes, nullptr, ActorsToIgnore, OutActors);
+
+	for (int i = 0; i < OutActors.Num(); i++)
 	{
-		if (GEngine)
+		if (IInteractInterface* InteractInterface = Cast<IInteractInterface>(OutActors[i]))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString(TEXT("Nothing")));
+			InteractInterface->Interact();
 		}
-		PushableObject = nullptr;
-		bCanPushObject = false;
 	}
 }

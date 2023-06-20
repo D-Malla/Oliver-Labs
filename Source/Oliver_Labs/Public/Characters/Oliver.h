@@ -51,14 +51,12 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Animations")
 	UAnimMontage* ButtonPressAnimMontage;
 
-//----------------------------------------------------------------------------------------------------------------------------------------------
 /* Core Components */
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	USpringArmComponent* SpringArmComponent;
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	UCameraComponent* CameraComponent;
 
-//----------------------------------------------------------------------------------------------------------------------------------------------
 /* Input */
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 		UInputMappingContext* OliverMappingContext;
@@ -86,21 +84,15 @@ private:
 	virtual void Jump() override;
 	void ToggleCrouch();
 	void PressButton();
-	void BeginPushObject();
-	void EndPushObject();
-
-//----------------------------------------------------------------------------------------------------------------------------------------------
-
-	void PerformLineTrace();
+	void InteractWithObject();
 
 public:
 /* GETTERS */
 	FORCEINLINE AOliverPlayerController* GetOliverPlayerController() const { return OliverPlayerController; }
 	FORCEINLINE bool GetIsCrouched() const { return bIsCrouched; }
 	FORCEINLINE bool GetCanPressButton() const { return bCanPressButton; }
-	//FORCEINLINE bool GetIsPushing() const { return bIsPushing; }
 
 /* SETTERS */
 	FORCEINLINE void SetCanPressButton(bool CanPress) { bCanPressButton = CanPress; }
-	//FORCEINLINE void SetIsPushing(bool Pushing) { bIsPushing = Pushing; }
+
 };

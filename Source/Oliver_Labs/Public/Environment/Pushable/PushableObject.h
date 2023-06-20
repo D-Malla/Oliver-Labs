@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
+#include "../../Interfaces/InteractInterface.h"
+
 #include "PushableObject.generated.h"
 
-class UBoxComponent;
-class UPrimitiveComponent;
 
 UCLASS()
-class OLIVER_LABS_API APushableObject : public AActor
+class OLIVER_LABS_API APushableObject : public AActor, public IInteractInterface
 {
 	GENERATED_BODY()
 
@@ -20,20 +20,16 @@ public:
 	APushableObject();
 
 	UFUNCTION()
-		bool CanPush();
+	virtual void Interact() override;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-		UStaticMeshComponent* MeshComponent;
-
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-		UBoxComponent* CollisionComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+	UStaticMeshComponent* MeshComponent;
 
 private:
-	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 
 };
