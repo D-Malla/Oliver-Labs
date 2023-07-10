@@ -9,6 +9,9 @@
 
 #include "PushableObject.generated.h"
 
+class AOliver;
+
+class UArrowComponent;
 
 UCLASS()
 class OLIVER_LABS_API APushableObject : public AActor, public IInteractInterface
@@ -18,9 +21,21 @@ class OLIVER_LABS_API APushableObject : public AActor, public IInteractInterface
 public:	
 	// Sets default values for this actor's properties
 	APushableObject();
+	void OnConstruction(const FTransform& Transform) override;
+
+	UPROPERTY()
+		UArrowComponent* ArrowComp; // ArrowComponent attached to each of the transforms within PushTransforms array.
+
 
 	UFUNCTION()
-	virtual void Interact() override;
+		virtual void Interact(ACharacter* Character) override;
+	UFUNCTION()
+		int FindClosestPushTransformIndex(FVector2D CharacterLocation, float PushRange);
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+		float ArrowSize = 1.f;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+		float ArrowLength = 40.f;
 
 protected:
 	// Called when the game starts or when spawned
@@ -30,6 +45,11 @@ protected:
 	UStaticMeshComponent* MeshComponent;
 
 private:
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Meta = (MakeEditWidget = true, ExposeOnSpawn = "true", AllowPrivateAccess = "true"))
+		TArray<FTransform> PushTransforms = {};
 
-
+public:
+	// GETTERS
+	APushableObject* GetPushableObject() { return this; }
+	TArray<FTransform> GetPushTransforms() { return PushTransforms; }
 };

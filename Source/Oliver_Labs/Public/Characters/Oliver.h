@@ -16,6 +16,7 @@ class UBoxComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
+class UPushComponent;
 class USpringArmComponent;
 
 UCLASS()
@@ -39,6 +40,14 @@ public:
 	UPROPERTY()
 	APushableObject* PushableObject;
 
+	/* Core Components */
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+		USpringArmComponent* SpringArmComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+		UCameraComponent* CameraComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+		UPushComponent* PushComponent;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -50,12 +59,6 @@ private:
 /* Animation References */
 	UPROPERTY(EditDefaultsOnly, Category = "Animations")
 	UAnimMontage* ButtonPressAnimMontage;
-
-/* Core Components */
-	UPROPERTY(EditDefaultsOnly, Category = "Components")
-	USpringArmComponent* SpringArmComponent;
-	UPROPERTY(EditDefaultsOnly, Category = "Components")
-	UCameraComponent* CameraComponent;
 
 /* Input */
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -77,6 +80,7 @@ private:
 	bool bIsCrouched;
 	bool bCanPressButton;
 	bool bCanPushObject;
+	bool bIsPushing;
 
 	// Input Callbacks
 	void Move(const FInputActionValue& Value);
@@ -90,9 +94,10 @@ public:
 /* GETTERS */
 	FORCEINLINE AOliverPlayerController* GetOliverPlayerController() const { return OliverPlayerController; }
 	FORCEINLINE bool GetIsCrouched() const { return bIsCrouched; }
+	FORCEINLINE bool GetIsPushing() const { return bIsPushing; }
 	FORCEINLINE bool GetCanPressButton() const { return bCanPressButton; }
 
 /* SETTERS */
 	FORCEINLINE void SetCanPressButton(bool CanPress) { bCanPressButton = CanPress; }
-
+	FORCEINLINE void SetIsPushing(bool bPushing) { bIsPushing = bPushing; }
 };
