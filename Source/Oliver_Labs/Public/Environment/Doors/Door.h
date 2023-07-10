@@ -8,6 +8,7 @@
 
 class AOliver;
 
+class UAudioComponent;
 class UBoxComponent;
 class USoundCue;
 
@@ -44,15 +45,19 @@ private:
 		USkeletalMeshComponent* DoorComponent;
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 		UBoxComponent* DoorVolume;
-	UPROPERTY(EditDefaultsOnly, Category = "Components")
-		USoundCue* OpenSFX;
-	UPROPERTY(EditDefaultsOnly, Category = "Components")
-		USoundCue* CloseSFX;
 	UPROPERTY(EditInstanceOnly, Category = "Animations")
 		UAnimSequence* DoorOpenAnim;
 	UPROPERTY(EditInstanceOnly, Category = "Animations")
 		UAnimSequence* DoorCloseAnim;
 
+	//UPROPERTY(EditDefaultsOnly, Category = "Components")
+	//	USoundCue* OpenDoorSoundCue;
+	//UPROPERTY(EditDefaultsOnly, Category = "Components")
+	//	USoundCue* CloseDoorSoundCue;
+	UPROPERTY(EditInstanceOnly, Category = "Components")
+		UAudioComponent* OpenDoorAudioComponent;
+	UPROPERTY(EditInstanceOnly, Category = "Components")
+		UAudioComponent* CloseDoorAudioComponent;
 public:
 	// Getters
 	// Setters
