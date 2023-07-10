@@ -26,12 +26,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement Properties")
 	float Speed;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement Properties")
 	bool bIsCrouched;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement Properties")
 	bool bIsInAir;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement Properties")
+	bool bIsPushing;
 
 	UFUNCTION(BlueprintCallable, Category = "Animations")
 	virtual void UpdateAnimProperties();

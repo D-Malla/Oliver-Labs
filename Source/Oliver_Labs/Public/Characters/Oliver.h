@@ -16,6 +16,7 @@ class UBoxComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
+class UPushComponent;
 class USpringArmComponent;
 
 UCLASS()
@@ -39,6 +40,14 @@ public:
 	UPROPERTY()
 	APushableObject* PushableObject;
 
+	/* Core Components */
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+		USpringArmComponent* SpringArmComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+		UCameraComponent* CameraComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+		UPushComponent* PushComponent;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -51,14 +60,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Animations")
 	UAnimMontage* ButtonPressAnimMontage;
 
-//----------------------------------------------------------------------------------------------------------------------------------------------
-/* Core Components */
-	UPROPERTY(EditDefaultsOnly, Category = "Components")
-	USpringArmComponent* SpringArmComponent;
-	UPROPERTY(EditDefaultsOnly, Category = "Components")
-	UCameraComponent* CameraComponent;
-
-//----------------------------------------------------------------------------------------------------------------------------------------------
 /* Input */
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 		UInputMappingContext* OliverMappingContext;
@@ -79,6 +80,7 @@ private:
 	bool bIsCrouched;
 	bool bCanPressButton;
 	bool bCanPushObject;
+	bool bIsPushing;
 
 	// Input Callbacks
 	void Move(const FInputActionValue& Value);
@@ -86,21 +88,16 @@ private:
 	virtual void Jump() override;
 	void ToggleCrouch();
 	void PressButton();
-	void BeginPushObject();
-	void EndPushObject();
-
-//----------------------------------------------------------------------------------------------------------------------------------------------
-
-	void PerformLineTrace();
+	void InteractWithObject();
 
 public:
 /* GETTERS */
 	FORCEINLINE AOliverPlayerController* GetOliverPlayerController() const { return OliverPlayerController; }
 	FORCEINLINE bool GetIsCrouched() const { return bIsCrouched; }
+	FORCEINLINE bool GetIsPushing() const { return bIsPushing; }
 	FORCEINLINE bool GetCanPressButton() const { return bCanPressButton; }
-	//FORCEINLINE bool GetIsPushing() const { return bIsPushing; }
 
 /* SETTERS */
 	FORCEINLINE void SetCanPressButton(bool CanPress) { bCanPressButton = CanPress; }
-	//FORCEINLINE void SetIsPushing(bool Pushing) { bIsPushing = Pushing; }
+	FORCEINLINE void SetIsPushing(bool bPushing) { bIsPushing = bPushing; }
 };

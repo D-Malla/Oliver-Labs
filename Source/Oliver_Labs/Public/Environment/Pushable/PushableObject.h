@@ -5,35 +5,51 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
+#include "../../Interfaces/InteractInterface.h"
+
 #include "PushableObject.generated.h"
 
-class UBoxComponent;
-class UPrimitiveComponent;
+class AOliver;
+
+class UArrowComponent;
 
 UCLASS()
-class OLIVER_LABS_API APushableObject : public AActor
+class OLIVER_LABS_API APushableObject : public AActor, public IInteractInterface
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this actor's properties
 	APushableObject();
+	void OnConstruction(const FTransform& Transform) override;
+
+	UPROPERTY()
+		UArrowComponent* ArrowComp; // ArrowComponent attached to each of the transforms within PushTransforms array.
+
 
 	UFUNCTION()
-		bool CanPush();
+		virtual void Interact(ACharacter* Character) override;
+	UFUNCTION()
+		int FindClosestPushTransformIndex(FVector2D CharacterLocation, float PushRange);
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+		float ArrowSize = 1.f;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+		float ArrowLength = 40.f;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-		UStaticMeshComponent* MeshComponent;
-
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-		UBoxComponent* CollisionComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+	UStaticMeshComponent* MeshComponent;
 
 private:
-	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Meta = (MakeEditWidget = true, ExposeOnSpawn = "true", AllowPrivateAccess = "true"))
+		TArray<FTransform> PushTransforms = {};
 
+public:
+	// GETTERS
+	APushableObject* GetPushableObject() { return this; }
+	TArray<FTransform> GetPushTransforms() { return PushTransforms; }
 };

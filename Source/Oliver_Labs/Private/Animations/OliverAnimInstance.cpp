@@ -36,4 +36,5 @@ void UOliverAnimInstance::UpdateAnimProperties()
 	Speed = PlayerReference->GetVelocity().Size();
 	bIsCrouched = PlayerReference->GetIsCrouched();
 	bIsInAir = PlayerReference->GetMovementComponent()->IsFalling();
+	bIsPushing = PlayerReference->GetIsPushing();
 }
