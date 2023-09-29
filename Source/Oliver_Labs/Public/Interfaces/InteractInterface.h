@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "InteractInterface.generated.h"
 
+class ACharacter;
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UInteractInterface : public UInterface
@@ -22,5 +24,6 @@ class OLIVER_LABS_API IInteractInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Interact() = 0;
+	//virtual void Interact() = 0;
+	virtual void Interact(ACharacter* Character) = 0;
 };

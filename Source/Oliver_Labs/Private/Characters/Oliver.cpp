@@ -3,19 +3,23 @@
 
 #include "Characters/Oliver.h"
 
-#include "Camera/CameraComponent.h"
 #include "Characters/OliverPlayerController.h"
+#include "Components/PushComponent.h"
+#include "Environment/Doors/ButtonDoor.h"
+#include "Environment/Pushable/PushableObject.h"
+#include "HUD/DoorButtonWidget.h"
+
+#include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "DrawDebugHelpers.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Environment/Doors/ButtonDoor.h"
-#include "Environment/Pushable/PushableObject.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "HUD/DoorButtonWidget.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 AOliver::AOliver()
@@ -36,10 +40,12 @@ AOliver::AOliver()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
+	PushComponent = CreateDefaultSubobject<UPushComponent>(TEXT("PushComponent"));
+
 	/* Input */
 	bIsCrouched = false;
 	bCanPressButton = false;
-	//bIsPushing = false;
+	bIsPushing = false;
 
 	ButtonDoor = nullptr;
 	ButtonVolume = nullptr;
@@ -71,10 +77,8 @@ void AOliver::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	PerformLineTrace();
 }
 
-//----------------------------------------------------------------------------------------------------------------------------------------------
 /* Input */
 // Called to bind functionality to input
 void AOliver::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -89,8 +93,7 @@ void AOliver::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AOliver::Jump);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AOliver::ToggleCrouch);
 		EnhancedInputComponent->BindAction(ButtonPressAction, ETriggerEvent::Started, this, &AOliver::PressButton);
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AOliver::BeginPushObject);
-		//EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AOliver::EndPushObject);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AOliver::InteractWithObject);
 	}
 } 
 
@@ -103,8 +106,11 @@ void AOliver::Move(const FInputActionValue& Value)
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-	AddMovementInput(ForwardDirection, MovementVector.Y);
-	AddMovementInput(RightDirection, MovementVector.X);
+	if (!PushComponent->GetIsPushingObject())
+	{
+		AddMovementInput(ForwardDirection, MovementVector.Y);
+		AddMovementInput(RightDirection, MovementVector.X);
+	};
 }
 
 void AOliver::Look(const FInputActionValue& Value)
@@ -117,86 +123,73 @@ void AOliver::Look(const FInputActionValue& Value)
 
 void AOliver::Jump()
 {
-	if (bIsCrouched) return;
-	
+	if (!PushComponent->GetIsPushingObject())
+	{
+		if (bIsCrouched) return;
+	}
+
 	Super::Jump();
 }
 
 void AOliver::ToggleCrouch()
 {
-	if (!bIsCrouched)
+	if (!PushComponent->GetIsPushingObject())
 	{
-		Crouch();
-		SpringArmComponent->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
-		GetCharacterMovement()->MaxWalkSpeed = 150.f;
-		bIsCrouched = true;
-	}
-	else if (bIsCrouched)
-	{
-		UnCrouch();
-		SpringArmComponent->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
-		bIsCrouched = false;
+		if (!bIsCrouched)
+		{
+			Crouch();
+			SpringArmComponent->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
+			GetCharacterMovement()->MaxWalkSpeed = 150.f;
+			bIsCrouched = true;
+		}
+		else if (bIsCrouched)
+		{
+			UnCrouch();
+			SpringArmComponent->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
+			GetCharacterMovement()->MaxWalkSpeed = 300.f;
+			bIsCrouched = false;
+		}
 	}
 }
 
 void AOliver::PressButton()
 {
-	if (bCanPressButton && ButtonPressAnimMontage && ButtonVolume)
+	if (!PushComponent->GetIsPushingObject())
 	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		AnimInstance->Montage_Play(ButtonPressAnimMontage);
-		ButtonDoor->SetIsDoorLocked(false);
-		bCanPressButton = false;
-		OliverPlayerController->RemoveButtonDoorHUD();
-	}
-}
-
-void AOliver::BeginPushObject()
-{
-	if (PushableObject)
-	{
-		PushableObject->CanPush();
-	}
-}
-
-void AOliver::EndPushObject()
-{
-
-}
-
-//----------------------------------------------------------------------------------------------------------------------------------------------
-
-void AOliver::PerformLineTrace()
-{
-	FVector Start = CameraComponent->GetComponentLocation();
-	FVector End = Start + CameraComponent->GetForwardVector() * 500.f;
-
-	FHitResult HitResult;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	
-	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 10.f);
-
-	if (Cast<APushableObject>(HitResult.GetActor()))
-	{
-		PushableObject = Cast<APushableObject>(HitResult.GetActor());
-		if (GEngine)
+		if (bCanPressButton && ButtonPressAnimMontage && ButtonVolume)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString(TEXT("PushableObject")));
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			AnimInstance->Montage_Play(ButtonPressAnimMontage);
+			ButtonDoor->SetIsDoorLocked(false);
+			bCanPressButton = false;
+			OliverPlayerController->RemoveButtonDoorHUD();
 		}
-
-		bCanPushObject = true;
 	}
+}
 
-	if (HitResult.GetActor() == NULL)
-	{
-		if (GEngine)
+void AOliver::InteractWithObject()
+{
+		UWorld* WorldREF = GetWorld();
+		FVector Center = GetActorLocation() - FVector(0.f, 0.f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight());	// Getting the foot location of character for sphere trace
+		float SphereRadius = PushComponent->GetPushRange();
+
+		// Initializing TArray variables for sphere trace arguments
+		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+		TArray<AActor*> ActorsToIgnore;
+		ActorsToIgnore.Add(this);
+		TArray<AActor*> OutActors;
+
+		DrawDebugSphere(GetWorld(), Center, SphereRadius, 12, FColor::White, false, 2.f, 0U, 1.f);
+		UKismetSystemLibrary::SphereOverlapActors(GetWorld(), Center, SphereRadius, ObjectTypes, nullptr, ActorsToIgnore, OutActors);
+
+		// Checking if any object within sphere radius inherits IInteractInterface. If it does...Interact()
+		for (int i = 0; i < OutActors.Num(); i++)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString(TEXT("Nothing")));
+			if (IInteractInterface* InteractInterface = Cast<IInteractInterface>(OutActors[i]))
+			{
+				InteractInterface->Interact(this);
+				break;
+			}
 		}
-		PushableObject = nullptr;
-		bCanPushObject = false;
-	}
 }
